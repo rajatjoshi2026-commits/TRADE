@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>NEON RUSH: CRASH &amp; DROP</title>
+
+  <!-- Google Fonts: Space Grotesk + JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Space+Grotesk:wght@500;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Space Grotesk"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            void: '#09090b',
+            panel: '#111115',
+            surface: '#18181f',
+            lime: '#a3e635',
+            violet: '#8b5cf6',
+            cyan: '#06b6d4',
+            coral: '#f43f5e',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    :root {
+      --bg-void: #09090b;
+      --neon-lime: #a3e635;
+      --neon-violet: #8b5cf6;
+      --neon-cyan: #06b6d4;
+      --neon-coral: #f43f5e;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-void);
+      color: #f4f4f5;
+      font-family: 'Space Grotesk', sans-serif;
+      overflow-x: hidden;
+      background-image:
+        radial-gradient(circle at 15% 10%, rgba(139, 92, 246, 0.14), transparent 35%),
+        radial-gradient(circle at 85% 85%, rgba(6, 182, 212, 0.12), transparent 38%),
+        linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 28px 28px, 28px 28px;
+    }
+
+    /* Neo-brutalist tactile buttons & cards */
+    .neo-card {
+      background: rgba(17, 17, 21, 0.92);
+      border: 1.5px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 6px 0 rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(12px);
+    }
+
+    .neo-btn {
+      transition: transform 0.08s cubic-bezier(0.2, 0.9, 0.3, 1), box-shadow 0.08s ease, filter 0.15s ease;
+      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.85);
+    }
+    .neo-btn:active:not(:disabled) {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.85);
+    }
+    .neo-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .glow-lime {
+      box-shadow: 0 0 22px rgba(163, 230, 53, 0.4), 0 4px 0 #3f6212;
+    }
+    .glow-coral {
+      box-shadow: 0 0 22px rgba(244, 63, 94, 0.45), 0 4px 0 #881337;
+    }
+    .glow-cyan {
+      box-shadow: 0 0 22px rgba(6, 182, 212, 0.4), 0 4px 0 #155e75;
+    }
+    .glow-violet {
+      box-shadow: 0 0 22px rgba(139, 92, 246, 0.4), 0 4px 0 #4c1d95;
+    }
+
+    /* Screen Shake Animations */
+    @keyframes shakeHard {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      15% { transform: translate(-6px, 4px) rotate(-0.8deg); }
+      30% { transform: translate(6px, -5px) rotate(0.8deg); }
+      45% { transform: translate(-5px, -3px) rotate(-0.5deg); }
+      60% { transform: translate(5px, 4px) rotate(0.5deg); }
+      75% { transform: translate(-3px, 2px) rotate(-0.2deg); }
+    }
+    .animate-shake {
+      animation: shakeHard 0.38s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    @keyframes pulseFast {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.04); }
+    }
+    .animate-pulse-fast {
+      animation: pulseFast 0.45s infinite ease-in-out;
+    }
+
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translateY(0) scale(0.85); }
+      100% { opacity: 0; transform: translateY(-75px) scale(1.3); }
+    }
+    .floating-emote {
+      animation: floatUp 1.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      pointer-events: none;
+    }
+
+    /* Custom thin scrollbar */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #09090b;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #27272a;
+      border-radius: 9999px;
+    }
+
+    /* Mine tile 3D pop */
+    .mine-tile {
+      transition: transform 0.14s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.15s ease, border-color 0.15s ease;
+    }
+    .mine-tile:hover:not(:disabled) {
+      transform: translateY(-2px);
+      border-color: rgba(163, 230, 53, 0.55);
+    }
+    .mine-tile:active:not(:disabled) {
+      transform: scale(0.94);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Floating Emote Overlay Container -->
+  <div id="emote-stage" class="fixed inset-0 pointer-events-none z-50 overflow-hidden"></div>
+
+  <!-- Toast Notification Banner -->
+  <div id="toast-container" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 pointer-events-none w-full max-w-sm px-4"></div>
+
+  <!-- TOP NAVIGATION / HUD BAR -->
+  <header class="sticky top-0 z-40 bg-void/90 backdrop-blur-md border-b border-white/10 px-3 sm:px-6 py-2.5">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+
+      <!-- Brand Logo + Free-to-Play Badge -->
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-lime via-cyan to-violet p-[2px] shadow-lg">
+          <div class="w-full h-full bg-void rounded-[10px] flex items-center justify-center">
+            <svg class="w-5 h-5 text-lime" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+            </svg>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-extrabold tracking-tight text-base sm:text-lg leading-none text-white">
+              NEON<span class="text-lime">RUSH</span>
+            </h1>
+            <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-cyan/15 text-cyan border border-cyan/30">
+              PLAY FOR FUN • VIRTUAL CREDITS ONLY
+            </span>
+          </div>
+          <p class="text-[10px] sm:hidden font-mono text-cyan uppercase tracking-wider mt-0.5">
+            VIRTUAL CREDITS ONLY
+          </p>
+        </div>
+      </div>
+
+      <!-- XP Rank Progress (Hidden on tiny screens, shown sm+) -->
+      <div class="hidden lg:flex items-center gap-3 bg-surface/90 border border-white/10 rounded-xl px-3 py-1.5 min-w-[240px]">
+        <div class="flex flex-col flex-1">
+          <div class="flex items-center justify-between text-[11px] font-mono mb-1">
+            <span id="rank-badge" class="font-extrabold text-violet">LVL 1 • ROOKIE</span>
+            <span id="xp-text" class="text-zinc-400">0 / 250 XP</span>
+          </div>
+          <div class="w-full h-1.5 bg-void rounded-full overflow-hidden border border-white/5">
+            <div id="xp-bar" class="h-full bg-gradient-to-r from-violet via-cyan to-lime transition-all duration-300" style="width: 0%"></div>
+          </div>
+        </div>
+        <div id="streak-pill" class="px-2 py-1 rounded-lg bg-amber-500/15 border border-amber-400/30 text-amber-300 font-mono text-xs font-bold">
+          🔥 0
+        </div>
+      </div>
+
+      <!-- Balance Pill + Reload + Audio Mute -->
+      <div class="flex items-center gap-2">
+        <div class="flex items-center bg-surface border border-lime/40 rounded-xl px-3 py-1.5 shadow-inner">
+          <span class="text-lime font-mono text-xs mr-1.5">◈</span>
+          <span id="balance-display" class="font-mono font-extrabold text-sm sm:text-base text-white tracking-tight">1,000.00</span>
+          <button id="reload-btn" onclick="reloadCredits()" title="Instant Free +500 Reload" class="ml-2 px-2 py-0.5 rounded-lg bg-lime text-void font-mono font-extrabold text-[11px] hover:brightness-110 active:scale-95 transition hidden">
+            +500
+          </button>
+        </div>
+
+        <button id="mute-btn" onclick="toggleMute()" aria-label="Toggle Sound" class="neo-btn p-2.5 rounded-xl bg-surface border border-white/15 text-zinc-200 hover:text-lime">
+          <svg id="icon-sound-on" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+          </svg>
+          <svg id="icon-sound-off" class="w-4 h-4 hidden text-coral" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <line x1="23" y1="9" x2="17" y2="15"></line>
+            <line x1="17" y1="9" x2="23" y2="15"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- RECENT MULTIPLIERS TICKER BAR -->
+  <div class="bg-panel/80 border-b border-white/10 px-3 sm:px-6 py-2">
+    <div class="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto no-scrollbar">
+      <span class="text-[11px] font-mono uppercase tracking-wider text-zinc-400 shrink-0 flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-lime animate-ping"></span>
+        LIVE HISTORY:
+      </span>
+      <div id="history-pills" class="flex items-center gap-1.5 overflow-x-auto py-0.5">
+        <!-- Populated dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN WORKSPACE GRID -->
+  <main id="app-shell" class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+    <!-- LEFT / CENTER STAGE (8 Cols on Desktop) -->
+    <div class="lg:col-span-8 flex flex-col gap-4">
+
+      <!-- Mode Switcher Tabs + Mobile XP Bar -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div class="grid grid-cols-2 p-1 rounded-2xl bg-panel border border-white/10 w-full sm:w-auto sm:min-w-[340px]">
+          <button id="tab-crash" onclick="switchMode('crash')" class="py-2 px-4 rounded-xl font-bold text-xs sm:text-sm tracking-wide transition-all bg-lime text-void shadow-md flex items-center justify-center gap-1.5">
+            <span>🚀</span> HYPER CRASH
+          </button>
+          <button id="tab-mines" onclick="switchMode('mines')" class="py-2 px-4 rounded-xl font-bold text-xs sm:text-sm tracking-wide transition-all text-zinc-400 hover:text-white flex items-center justify-center gap-1.5">
+            <span>💎</span> CYBER MINES
+          </button>
+        </div>
+
+        <!-- Mobile Rank Indicator -->
+        <div class="flex lg:hidden items-center justify-between bg-panel border border-white/10 rounded-xl px-3 py-1.5 text-xs font-mono">
+          <span id="rank-badge-mobile" class="font-bold text-violet">LVL 1 • ROOKIE</span>
+          <div class="flex items-center gap-2">
+            <span id="xp-text-mobile" class="text-zinc-400">0/250 XP</span>
+            <span id="streak-pill-mobile" class="px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300 font-bold">🔥 0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- MODE 1: HYPER CRASH ARENA                                    -->
+      <!-- ============================================================ -->
+      <section id="view-crash" class="flex flex-col gap-4">
+
+        <!-- Canvas Viewport Card -->
+        <div id="crash-stage-card" class="neo-card rounded-3xl relative overflow-hidden h-[320px] sm:h-[380px] flex flex-col justify-between p-4 sm:p-6">
+          <!-- Interactive HTML5 Canvas -->
+          <canvas id="crash-canvas" class="absolute inset-0 w-full h-full block"></canvas>
+
+          <!-- Top Stage Status Badges -->
+          <div class="relative z-10 flex items-center justify-between pointer-events-none">
+            <div id="crash-status-pill" class="px-3 py-1 rounded-full bg-void/80 border border-white/15 font-mono text-xs font-bold text-cyan flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-cyan"></span>
+              <span>READY FOR LAUNCH</span>
+            </div>
+            <div id="boost-counter-pill" class="px-3 py-1 rounded-full bg-void/80 border border-violet/40 font-mono text-xs font-bold text-violet">
+              ⚡ OVERDRIVE: +0.00x
+            </div>
+          </div>
+
+          <!-- Center Huge Multiplier Readout -->
+          <div class="relative z-10 my-auto flex flex-col items-center justify-center text-center pointer-events-none select-none">
+            <div id="crash-multiplier" class="font-mono font-extrabold text-6xl sm:text-7xl md:text-8xl tracking-tighter text-white drop-shadow-[0_0_25px_rgba(163,230,53,0.35)] transition-transform duration-75">
+              1.00x
+            </div>
+            <div id="crash-subtext" class="mt-1 font-mono text-xs sm:text-sm font-bold uppercase tracking-widest text-zinc-400">
+              SET WAGER &amp; HIT LAUNCH
+            </div>
+          </div>
+
+          <!-- Skill Timing Bar: SYNC BOOST Rhythm Window -->
+          <div id="sync-meter-wrapper" class="relative z-10 w-full max-w-md mx-auto opacity-35 transition-opacity duration-200">
+            <div class="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider mb-1">
+              <span class="text-zinc-400">PULSE SYNC TIMING</span>
+              <span id="sync-feedback-label" class="text-lime font-bold">HIT GREEN ZONE (+0.25x)</span>
+            </div>
+            <div class="relative h-4 w-full bg-void/90 rounded-full border border-white/20 overflow-hidden p-0.5">
+              <!-- Target Sweet Spot Zone -->
+              <div id="sync-target-zone" class="absolute top-0 bottom-0 bg-lime/35 border-x-2 border-lime transition-all duration-150" style="left: 58%; width: 22%;"></div>
+              <!-- Moving Pulse Cursor -->
+              <div id="sync-cursor" class="absolute top-0.5 bottom-0.5 w-2.5 rounded-full bg-white shadow-[0_0_10px_#fff]" style="left: 0%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Crash Control Deck -->
+        <div class="neo-card rounded-3xl p-4 sm:p-5 grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+
+          <!-- Bet Amount & Quick Chips (7 cols) -->
+          <div class="md:col-span-7 flex flex-col gap-2.5">
+            <div class="flex items-center justify-between">
+              <label for="crash-bet-input" class="text-xs font-mono uppercase tracking-wider text-zinc-400">WAGER AMOUNT</label>
+              <div class="flex items-center gap-1.5">
+                <span class="text-[11px] font-mono text-zinc-400">AUTO CASHOUT:</span>
+                <input id="auto-cashout-input" type="number" step="0.1" min="1.1" placeholder="OFF" class="w-20 bg-void border border-white/15 rounded-lg px-2 py-1 text-right font-mono text-xs text-cyan focus:outline-none focus:border-cyan" />
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <div class="relative flex-1">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-lime font-mono font-bold">◈</span>
+                <input id="crash-bet-input" type="number" min="1" value="50" class="w-full bg-void border-2 border-white/15 focus:border-lime rounded-2xl pl-8 pr-3 py-3 font-mono font-extrabold text-lg text-white focus:outline-none" />
+              </div>
+              <button onclick="adjustBet('crash', 0.5)" class="neo-btn px-3 py-3 rounded-2xl bg-surface border border-white/15 font-mono font-bold text-xs text-zinc-300 hover:text-white">½</button>
+              <button onclick="adjustBet('crash', 2)" class="neo-btn px-3 py-3 rounded-2xl bg-surface border border-white/15 font-mono font-bold text-xs text-zinc-300 hover:text-white">2x</button>
+              <button onclick="adjustBet('crash', 'max')" class="neo-btn px-3 py-3 rounded-2xl bg-surface border border-white/15 font-mono font-bold text-xs text-lime">MAX</button>
+            </div>
+
+            <!-- Quick Chip Row -->
+            <div class="grid grid-cols-4 gap-2">
+              <button onclick="setBet('crash', 10)" class="neo-btn py-1.5 rounded-xl bg-surface/80 border border-white/10 font-mono text-xs font-bold text-zinc-300 hover:border-lime/50">+10</button>
+              <button onclick="setBet('crash', 50)" class="neo-btn py-1.5 rounded-xl bg-surface/80 border border-white/10 font-mono text-xs font-bold text-zinc-300 hover:border-lime/50">+50</button>
+              <button onclick="setBet('crash', 100)" class="neo-btn py-1.5 rounded-xl bg-surface/80 border border-white/10 font-mono text-xs font-bold text-zinc-300 hover:border-lime/50">+100</button>
+              <button onclick="setBet('crash', 500)" class="neo-btn py-1.5 rounded-xl bg-surface/80 border border-white/10 font-mono text-xs font-bold text-zinc-300 hover:border-lime/50">+500</button>
+            </div>
+          </div>
+
+          <!-- Primary Action Buttons (5 cols) -->
+          <div class="md:col-span-5 flex flex-col gap-2.5 h-full justify-center">
+            <!-- LAUNCH / CASH OUT Main Button -->
+            <button id="crash-main-btn" onclick="handleCrashPrimaryAction()" class="neo-btn glow-lime w-full py-4 px-5 rounded-2xl bg-lime text-void font-extrabold text-lg sm:text-xl tracking-wide uppercase flex flex-col items-center justify-center leading-tight">
+              <span id="crash-btn-title">🚀 LAUNCH</span>
+              <span id="crash-btn-sub" class="font-mono text-xs font-bold opacity-80">WIN UP TO 100x</span>
+            </button>
+
+            <!-- Skill Button: SYNC BOOST -->
+            <button id="sync-boost-btn" onclick="triggerSyncBoost()" disabled class="neo-btn w-full py-3 px-4 rounded-2xl bg-violet text-white font-extrabold text-sm tracking-wider uppercase flex items-center justify-center gap-2 border border-white/20">
+              <span>⚡ SYNC BOOST</span>
+              <span class="px-1.5 py-0.5 rounded bg-void/40 font-mono text-[11px] text-lime">+0.25x</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- MODE 2: CYBER MINES GRID ARENA                               -->
+      <!-- ============================================================ -->
+      <section id="view-mines" class="hidden flex-col gap-4">
+        <div class="neo-card rounded-3xl p-4 sm:p-6 grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
+
+          <!-- 5x5 Neon Tile Grid (7 cols) -->
+          <div class="md:col-span-7 flex flex-col items-center">
+            <div class="w-full max-w-[360px] flex items-center justify-between mb-3 px-1">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-mono text-zinc-400">NEXT TILE:</span>
+                <span id="mines-next-mult" class="px-2 py-0.5 rounded-lg bg-cyan/15 border border-cyan/30 font-mono font-bold text-xs text-cyan">1.13x</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-mono text-zinc-400">CURRENT:</span>
+                <span id="mines-curr-mult" class="px-2 py-0.5 rounded-lg bg-lime/15 border border-lime/30 font-mono font-bold text-xs text-lime">1.00x</span>
+              </div>
+            </div>
+
+            <div id="mines-grid" class="grid grid-cols-5 gap-2 sm:gap-2.5 w-full max-w-[360px] aspect-square p-2.5 rounded-2xl bg-void border border-white/10">
+              <!-- 25 Tiles Generated by JS -->
+            </div>
+          </div>
+
+          <!-- Mines Controls (5 cols) -->
+          <div class="md:col-span-5 flex flex-col gap-3.5">
+            <div>
+              <label class="text-xs font-mono uppercase tracking-wider text-zinc-400 block mb-1.5">WAGER AMOUNT</label>
+              <div class="flex items-center gap-1.5">
+                <div class="relative flex-1">
+                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-lime font-mono font-bold">◈</span>
+                  <input id="mines-bet-input" type="number" min="1" value="50" class="w-full bg-void border-2 border-white/15 focus:border-cyan rounded-xl pl-8 pr-2 py-2.5 font-mono font-extrabold text-base text-white focus:outline-none" />
+                </div>
+                <button onclick="adjustBet('mines', 0.5)" class="neo-btn px-2.5 py-2.5 rounded-xl bg-surface border border-white/15 font-mono font-bold text-xs">½</button>
+                <button onclick="adjustBet('mines', 2)" class="neo-btn px-2.5 py-2.5 rounded-xl bg-surface border border-white/15 font-mono font-bold text-xs">2x</button>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="text-xs font-mono uppercase tracking-wider text-zinc-400">MINE TRAPS (1–10)</label>
+                <span id="mine-count-label" class="font-mono font-extrabold text-sm text-coral">3 MINES</span>
+              </div>
+              <input id="mine-count-slider" type="range" min="1" max="10" value="3" oninput="updateMineCountLabel(this.value)" class="w-full accent-coral cursor-pointer" />
+              <div class="grid grid-cols-4 gap-1.5 mt-2">
+                <button onclick="setMineCount(1)" class="py-1 rounded-lg bg-surface border border-white/10 font-mono text-xs hover:border-coral">1</button>
+                <button onclick="setMineCount(3)" class="py-1 rounded-lg bg-surface border border-white/10 font-mono text-xs hover:border-coral">3</button>
+                <button onclick="setMineCount(5)" class="py-1 rounded-lg bg-surface border border-white/10 font-mono text-xs hover:border-coral">5</button>
+                <button onclick="setMineCount(10)" class="py-1 rounded-lg bg-surface border border-white/10 font-mono text-xs hover:border-coral">10</button>
+              </div>
+            </div>
+
+            <button id="mines-main-btn" onclick="handleMinesPrimaryAction()" class="neo-btn glow-cyan w-full py-4 px-4 rounded-2xl bg-cyan text-void font-extrabold text-base sm:text-lg uppercase tracking-wide flex flex-col items-center justify-center leading-tight mt-1">
+              <span id="mines-btn-title">START GRID</span>
+              <span id="mines-btn-sub" class="font-mono text-xs font-bold opacity-80">FIND DIAMONDS • AVOID BOMBS</span>
+            </button>
+
+            <button id="mines-pick-random-btn" onclick="pickRandomMineTile()" disabled class="neo-btn w-full py-2.5 px-4 rounded-xl bg-surface border border-white/15 font-mono font-bold text-xs text-zinc-200 hover:text-lime">
+              🎲 LUCKY RANDOM TILE
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- DAILY / SESSION QUESTS BAR -->
+      <section class="neo-card rounded-3xl p-4">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-xs sm:text-sm font-mono font-extrabold uppercase tracking-wider text-white flex items-center gap-2">
+            <span class="text-lime">★</span> SESSION OVERDRIVE QUESTS
+          </h2>
+          <span class="text-[11px] font-mono text-zinc-400">COMPLETE FOR BONUS XP &amp; CREDITS</span>
+        </div>
+        <div id="quests-list" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          <!-- Populated dynamically -->
+        </div>
+      </section>
+
+    </div>
+
+    <!-- RIGHT SIDEBAR: LIVE SOCIAL FEED & HYPE EMOTES (4 Cols on Desktop) -->
+    <aside class="lg:col-span-4 flex flex-col gap-4">
+      <div class="neo-card rounded-3xl p-4 flex flex-col h-[420px] lg:h-full max-h-[680px]">
+        <div class="flex items-center justify-between pb-3 border-b border-white/10">
+          <div class="flex items-center gap-2">
+            <span class="relative flex h-2.5 w-2.5">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-lime opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-lime"></span>
+            </span>
+            <h2 class="font-extrabold text-sm tracking-wide uppercase">DEGEN LOBBY LIVE</h2>
+          </div>
+          <span id="online-count" class="font-mono text-xs text-zinc-400 bg-surface px-2 py-0.5 rounded-lg border border-white/10">428 ONLINE</span>
+        </div>
+
+        <!-- Simulated Live Activity Feed -->
+        <div id="social-feed" class="flex-1 overflow-y-auto py-3 space-y-2.5 pr-1">
+          <!-- Feed items injected via JS -->
+        </div>
+
+        <!-- Interactive Hype Emote Bar -->
+        <div class="pt-3 border-t border-white/10">
+          <div class="text-[10px] font-mono uppercase tracking-wider text-zinc-400 mb-2 flex justify-between">
+            <span>DROP HYPE REACTION</span>
+            <span class="text-cyan">TAP TO SPAM</span>
+          </div>
+          <div class="grid grid-cols-4 gap-2">
+            <button onclick="sendHypeEmote('🔥')" class="neo-btn py-2 rounded-xl bg-surface border border-white/15 text-lg hover:border-amber-400 active:scale-90">🔥</button>
+            <button onclick="sendHypeEmote('🚀')" class="neo-btn py-2 rounded-xl bg-surface border border-white/15 text-lg hover:border-lime active:scale-90">🚀</button>
+            <button onclick="sendHypeEmote('💎')" class="neo-btn py-2 rounded-xl bg-surface border border-white/15 text-lg hover:border-cyan active:scale-90">💎</button>
+            <button onclick="sendHypeEmote('💀')" class="neo-btn py-2 rounded-xl bg-surface border border-white/15 text-lg hover:border-coral active:scale-90">💀</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- FOOTER DISCLAIMER -->
+  <footer class="border-t border-white/10 py-3 px-4 text-center text-[11px] font-mono text-zinc-500">
+    NEON RUSH: CRASH &amp; DROP • 100% FREE-TO-PLAY ARCADE SIMULATION • VIRTUAL CREDITS HAVE ZERO REAL-WORLD MONETARY VALUE
+  </footer>
+
+  <script>
+    /* ==========================================================================
+       1. WEB AUDIO API SYNTHESIZER (Zero External MP3 Dependencies)
+       ========================================================================== */
+    class NeonAudioEngine {
+      constructor() {
+        this.ctx = null;
+        this.muted = false;
+        this.thrustOsc = null;
+        this.thrustGain = null;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioCtx();
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playBlip(freq = 520, duration = 0.06, type = 'triangle', vol = 0.12) {
+        if (this.muted) return;
+        try {
+          this.init();
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(freq * 1.35, this.ctx.currentTime + duration);
+
+          gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + duration);
+        } catch (e) {}
+      }
+
+      startRocketThrust() {
+        if (this.muted) return;
+        try {
+          this.init();
+          this.stopRocketThrust();
+          this.thrustOsc = this.ctx.createOscillator();
+          this.thrustGain = this.ctx.createGain();
+          this.thrustOsc.type = 'sawtooth';
+          this.thrustOsc.frequency.setValueAtTime(110, this.ctx.currentTime);
+
+          // Lowpass filter for warm cyberpunk synth rise
+          const filter = this.ctx.createBiquadFilter();
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(650, this.ctx.currentTime);
+
+          this.thrustGain.gain.setValueAtTime(0.055, this.ctx.currentTime);
+          this.thrustOsc.connect(filter);
+          filter.connect(this.thrustGain);
+          this.thrustGain.connect(this.ctx.destination);
+          this.thrustOsc.start();
+        } catch (e) {}
+      }
+
+      updateRocketPitch(multiplier) {
+        if (this.muted || !this.thrustOsc || !this.ctx) return;
+        try {
+          const targetFreq = Math.min(880, 110 + (multiplier - 1) * 95);
+          this.thrustOsc.frequency.setTargetAtTime(targetFreq, this.ctx.currentTime, 0.05);
+        } catch (e) {}
+      }
+
+      stopRocketThrust() {
+        if (this.thrustOsc) {
+          try {
+            this.thrustOsc.stop();
+            this.thrustOsc.disconnect();
+          } catch (e) {}
+          this.thrustOsc = null;
+        }
+      }
+
+      playSyncHit() {
+        if (this.muted) return;
+        try {
+          this.init();
+          const notes = [587.33, 880, 1174.66]; // D5 -> A5 -> D6
+          notes.forEach((n, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            const start = this.ctx.currentTime + idx * 0.045;
+            osc.frequency.setValueAtTime(n, start);
+            gain.gain.setValueAtTime(0.15, start);
+            gain.gain.exponentialRampToValueAtTime(0.001, start + 0.18);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(start);
+            osc.stop(start + 0.19);
+          });
+        } catch (e) {}
+      }
+
+      playCashout() {
+        if (this.muted) return;
+        try {
+          this.init();
+          const chord = [523.25, 659.25, 783.99, 1046.50]; // C Major arpeggio
+          chord.forEach((freq, i) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            const t = this.ctx.currentTime + i * 0.055;
+            osc.frequency.setValueAtTime(freq, t);
+            gain.gain.setValueAtTime(0.18, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(t);
+            osc.stop(t + 0.36);
+          });
+        } catch (e) {}
+      }
+
+      playCrashExplosion() {
+        if (this.muted) return;
+        try {
+          this.init();
+          // Sub-bass drop
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(140, this.ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(28, this.ctx.currentTime + 0.45);
+          gain.gain.setValueAtTime(0.28, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.48);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.5);
+        } catch (e) {}
+      }
+    }
+
+    const sfx = new NeonAudioEngine();
+
+    /* ==========================================================================
+       2. GLOBAL PLAYER STATE, XP SYSTEM & QUESTS
+       ========================================================================== */
+    const RANKS = [
+      { level: 1, title: 'ROOKIE', minXp: 0 },
+      { level: 2, title: 'DEGEN', minXp: 250 },
+      { level: 3, title: 'HIGH ROLLER', minXp: 750 },
+      { level: 4, title: 'WHALE', minXp: 1800 },
+      { level: 5, title: 'CYBER LORD', minXp: 4000 }
+    ];
+
+    const state = {
+      balance: 1000.00,
+      xp: 0,
+      streak: 0,
+      mode: 'crash',
+      history: [2.45, 1.12, 8.90, 1.64, 3.20, 1.04, 14.50, 2.05],
+      quests: [
+        { id: 'q1', label: 'Cash out ≥ 2.00x twice', progress: 0, target: 2, rewardCredits: 150, rewardXp: 100, done: false },
+        { id: 'q2', label: 'Hit 3 Overdrive Sync Boosts', progress: 0, target: 3, rewardCredits: 200, rewardXp: 120, done: false },
+        { id: 'q3', label: 'Uncover 5 Cyber Mine Gems', progress: 0, target: 5, rewardCredits: 150, rewardXp: 100, done: false }
+      ],
+      // Hyper Crash State
+      crash: {
+        status: 'IDLE', // IDLE | RUNNING | CASHED_OUT | CRASHED
+        bet: 50,
+        multiplier: 1.00,
+        crashPoint: 2.00,
+        bonusMult: 0,
+        startTime: 0,
+        points: [],
+        particles: [],
+        syncPos: 0,
+        syncDir: 1,
+        zoneStart: 58,
+        zoneWidth: 22,
+        syncCooldown: 0
+      },
+      // Cyber Mines State
+      mines: {
+        active: false,
+        bet: 50,
+        mineCount: 3,
+        board: [], // 'gem' | 'mine'
+        revealed: Array(25).fill(false),
+        gemsFound: 0,
+        currentMult: 1.00
+      }
+    };
+
+    /* ==========================================================================
+       3. UI HELPERS, BALANCE, XP & QUEST UPDATES
+       ========================================================================== */
+    function formatMoney(num) {
+      return Number(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function updateHUD() {
+      document.getElementById('balance-display').textContent = formatMoney(state.balance);
+      const reloadBtn = document.getElementById('reload-btn');
+      if (state.balance < 10) {
+        reloadBtn.classList.remove('hidden');
+      } else {
+        reloadBtn.classList.add('hidden');
+      }
+
+      // Compute Rank
+      let currentRank = RANKS[0];
+      let nextRank = RANKS[RANKS.length - 1];
+      for (let i = 0; i < RANKS.length; i++) {
+        if (state.xp >= RANKS[i].minXp) {
+          currentRank = RANKS[i];
+          nextRank = RANKS[i + 1] || { minXp: currentRank.minXp + 2000 };
+        }
+      }
+      const prevXp = currentRank.minXp;
+      const span = Math.max(1, nextRank.minXp - prevXp);
+      const pct = Math.min(100, Math.round(((state.xp - prevXp) / span) * 100));
+
+      document.getElementById('rank-badge').textContent = `LVL ${currentRank.level} • ${currentRank.title}`;
+      document.getElementById('xp-text').textContent = `${state.xp} / ${nextRank.minXp} XP`;
+      document.getElementById('xp-bar').style.width = `${pct}%`;
+      document.getElementById('streak-pill').textContent = `🔥 ${state.streak}`;
+
+      document.getElementById('rank-badge-mobile').textContent = `LVL ${currentRank.level} • ${currentRank.title}`;
+      document.getElementById('xp-text-mobile').textContent = `${state.xp}/${nextRank.minXp} XP`;
+      document.getElementById('streak-pill-mobile').textContent = `🔥 ${state.streak}`;
+
+      renderHistoryPills();
+      renderQuests();
+    }
+
+    function addXP(amount) {
+      state.xp += amount;
+      updateHUD();
+    }
+
+    function progressQuest(id, inc = 1) {
+      const q = state.quests.find(item => item.id === id);
+      if (!q || q.done) return;
+      q.progress = Math.min(q.target, q.progress + inc);
+      if (q.progress >= q.target) {
+        q.done = true;
+        state.balance += q.rewardCredits;
+        state.xp += q.rewardXp;
+        showToast(`🏆 QUEST COMPLETE! +${q.rewardCredits} CREDITS & +${q.rewardXp} XP`, 'lime');
+        sfx.playCashout();
+      }
+      updateHUD();
+    }
+
+    function renderQuests() {
+      const container = document.getElementById('quests-list');
+      container.innerHTML = state.quests.map(q => {
+        const pct = Math.round((q.progress / q.target) * 100);
+        return `
+          <div class="p-3 rounded-2xl bg-void/90 border ${q.done ? 'border-lime/50' : 'border-white/10'} flex flex-col justify-between gap-2">
+            <div class="flex items-start justify-between gap-2">
+              <span class="text-xs font-bold ${q.done ? 'text-lime line-through opacity-80' : 'text-zinc-200'}">${q.label}</span>
+              <span class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-surface text-cyan shrink-0">+${q.rewardCredits}◈</span>
+            </div>
+            <div>
+              <div class="flex justify-between text-[10px] font-mono text-zinc-400 mb-1">
+                <span>${q.done ? 'CLAIMED' : 'PROGRESS'}</span>
+                <span>${q.progress}/${q.target}</span>
+              </div>
+              <div class="w-full h-1.5 bg-surface rounded-full overflow-hidden">
+                <div class="h-full ${q.done ? 'bg-lime' : 'bg-violet'} transition-all duration-300" style="width: ${pct}%"></div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderHistoryPills() {
+      const container = document.getElementById('history-pills');
+      container.innerHTML = state.history.slice(0, 14).map(val => {
+        let style = 'bg-surface text-zinc-300 border-white/10';
+        if (val >= 10) style = 'bg-lime/20 text-lime border-lime/50 shadow-[0_0_10px_rgba(163,230,53,0.25)]';
+        else if (val >= 2) style = 'bg-cyan/15 text-cyan border-cyan/40';
+        else if (val < 1.3) style = 'bg-coral/15 text-coral border-coral/35';
+
+        return `<span class="px-2.5 py-0.5 rounded-full border font-mono text-xs font-bold shrink-0 ${style}">${val.toFixed(2)}x</span>`;
+      }).join('');
+    }
+
+    function showToast(msg, tone = 'lime') {
+      const container = document.getElementById('toast-container');
+      const el = document.createElement('div');
+      const colors = {
+        lime: 'bg-lime text-void border-lime',
+        coral: 'bg-coral text-white border-coral',
+        cyan: 'bg-cyan text-void border-cyan',
+        violet: 'bg-violet text-white border-violet'
+      };
+      el.className = `px-4 py-2 rounded-2xl font-mono font-extrabold text-xs shadow-2xl border ${colors[tone] || colors.lime} transition-all duration-300 transform translate-y-0 opacity-100 text-center`;
+      el.textContent = msg;
+      container.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(-10px)';
+        setTimeout(() => el.remove(), 300);
+      }, 2400);
+    }
+
+    function triggerScreenShake() {
+      const shell = document.getElementById('app-shell');
+      shell.classList.remove('animate-shake');
+      void shell.offsetWidth;
+      shell.classList.add('animate-shake');
+    }
+
+    function reloadCredits() {
+      state.balance += 500;
+      sfx.playCashout();
+      showToast('⚡ +500 FREE FUN CREDITS RELOADED!', 'lime');
+      updateHUD();
+    }
+
+    function toggleMute() {
+      sfx.muted = !sfx.muted;
+      if (sfx.muted) sfx.stopRocketThrust();
+      document.getElementById('icon-sound-on').classList.toggle('hidden', sfx.muted);
+      document.getElementById('icon-sound-off').classList.toggle('hidden', !sfx.muted);
+    }
+
+    function switchMode(mode) {
+      sfx.playBlip(600, 0.05);
+      state.mode = mode;
+      const crashView = document.getElementById('view-crash');
+      const minesView = document.getElementById('view-mines');
+      const tabCrash = document.getElementById('tab-crash');
+      const tabMines = document.getElementById('tab-mines');
+
+      if (mode === 'crash') {
+        crashView.classList.remove('hidden');
+        minesView.classList.add('hidden');
+        tabCrash.className = 'py-2 px-4 rounded-xl font-bold text-xs sm:text-sm tracking-wide transition-all bg-lime text-void shadow-md flex items-center justify-center gap-1.5';
+        tabMines.className = 'py-2 px-4 rounded-xl font-bold text-xs sm:text-sm tracking-wide transition-all text-zinc-400 hover:text-white flex items-center justify-center gap-1.5';
+        resizeCrashCanvas();
+      } else {
+        crashView.classList.add('hidden');
+        minesView.classList.remove('hidden');
+        minesView.classList.add('flex');
+        tabMines.className = 'py-2 px-4 rounded-xl font-bold text-xs sm:text-sm tracking-wide transition-all bg-cyan text-void shadow-md flex items-center justify-center gap-1.5';
+        tabCrash.className = 'py-2 px-4 rounded-xl font-bold text-xs sm:text-sm tracking-wide transition-all text-zinc-400 hover:text-white flex items-center justify-center gap-1.5';
+      }
+    }
+
+    function setBet(game, addAmount) {
+      sfx.playBlip(480, 0.04);
+      const input = document.getElementById(`${game}-bet-input`);
+      const current = parseFloat(input.value) || 0;
+      const next = Math.min(state.balance, current + addAmount);
+      input.value = Math.max(1, Math.floor(next));
+    }
+
+    function adjustBet(game, factor) {
+      sfx.playBlip(520, 0.04);
+      const input = document.getElementById(`${game}-bet-input`);
+      let val = parseFloat(input.value) || 10;
+      if (factor === 'max') {
+        val = Math.floor(state.balance);
+      } else {
+        val = Math.max(1, Math.floor(val * factor));
+      }
+      input.value = Math.min(Math.max(1, Math.floor(state.balance)), val);
+    }
+
+    /* ==========================================================================
+       4. MODE 1: HYPER CRASH + OVERDRIVE SYNC BOOST ENGINE
+       ========================================================================== */
+    const canvas = document.getElementById('crash-canvas');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCrashCanvas() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    window.addEventListener('resize', resizeCrashCanvas);
+
+    function generateCrashPoint() {
+      // House edge ~4%, instant bust chance 3%, heavy-tail thrilling multipliers
+      const r = Math.random();
+      if (r < 0.03) return 1.00;
+      const raw = 0.96 / (1 - r);
+      return Math.min(100, Math.max(1.01, Math.floor(raw * 100) / 100));
+    }
+
+    function handleCrashPrimaryAction() {
+      if (state.crash.status === 'RUNNING') {
+        cashOutCrash();
+      } else {
+        launchCrashRound();
+      }
+    }
+
+    function launchCrashRound() {
+      const betInput = document.getElementById('crash-bet-input');
+      const bet = parseFloat(betInput.value);
+
+      if (isNaN(bet) || bet <= 0) {
+        showToast('ENTER A VALID WAGER!', 'coral');
+        return;
+      }
+      if (bet > state.balance) {
+        showToast('NOT ENOUGH CREDITS — HIT +500 RELOAD!', 'coral');
+        return;
+      }
+
+      // Deduct wager & initialize flight
+      state.balance -= bet;
+      state.crash.bet = bet;
+      state.crash.status = 'RUNNING';
+      state.crash.multiplier = 1.00;
+      state.crash.bonusMult = 0;
+      state.crash.crashPoint = generateCrashPoint();
+      state.crash.startTime = performance.now();
+      state.crash.points = [{ x: 0, y: 1 }];
+      state.crash.particles = [];
+      state.crash.syncPos = 0;
+      state.crash.syncDir = 1;
+      state.crash.zoneStart = 45 + Math.random() * 30;
+      state.crash.syncCooldown = 0;
+
+      sfx.playBlip(740, 0.08, 'sawtooth', 0.16);
+      sfx.startRocketThrust();
+      addXP(15);
+      updateHUD();
+
+      // Update UI controls
+      const mainBtn = document.getElementById('crash-main-btn');
+      mainBtn.className = 'neo-btn glow-cyan w-full py-4 px-5 rounded-2xl bg-cyan text-void font-extrabold text-lg sm:text-xl tracking-wide uppercase flex flex-col items-center justify-center leading-tight animate-pulse-fast';
+      document.getElementById('crash-btn-title').textContent = '💰 CASH OUT';
+      document.getElementById('crash-btn-sub').textContent = `TAKE ◈ ${formatMoney(bet)}`;
+
+      const syncBtn = document.getElementById('sync-boost-btn');
+      syncBtn.disabled = false;
+      syncBtn.classList.add('glow-violet');
+
+      document.getElementById('sync-meter-wrapper').classList.remove('opacity-35');
+      document.getElementById('sync-target-zone').style.left = `${state.crash.zoneStart}%`;
+      document.getElementById('boost-counter-pill').textContent = '⚡ OVERDRIVE: +0.00x';
+
+      const pill = document.getElementById('crash-status-pill');
+      pill.innerHTML = `<span class="w-2 h-2 rounded-full bg-lime animate-ping"></span><span class="text-lime">IN FLIGHT • ASCENDING</span>`;
+
+      const multEl = document.getElementById('crash-multiplier');
+      multEl.classList.remove('text-coral', 'text-cyan');
+      multEl.classList.add('text-white');
+      document.getElementById('crash-subtext').textContent = 'TAP CASH OUT BEFORE GLITCH!';
+    }
+
+    function triggerSyncBoost() {
+      if (state.crash.status !== 'RUNNING') return;
+      if (state.crash.syncCooldown > 0) return;
+
+      const pos = state.crash.syncPos;
+      const start = state.crash.zoneStart;
+      const end = start + state.crash.zoneWidth;
+
+      state.crash.syncCooldown = 0.45; // brief cooldown to prevent mash-spam
+      const feedback = document.getElementById('sync-feedback-label');
+
+      if (pos >= start - 2 && pos <= end + 2) {
+        // NAILED THE SYNC WINDOW!
+        state.crash.bonusMult += 0.25;
+        state.crash.multiplier += 0.25;
+        sfx.playSyncHit();
+        spawnCrashParticles(18, '#a3e635');
+        progressQuest('q2', 1);
+        addXP(20);
+
+        feedback.textContent = 'PERFECT SYNC! +0.25x 🔥';
+        feedback.className = 'text-lime font-extrabold';
+        document.getElementById('boost-counter-pill').textContent = `⚡ OVERDRIVE: +${state.crash.bonusMult.toFixed(2)}x`;
+
+        // Relocate sweet spot for next rhythm hit
+        state.crash.zoneStart = 18 + Math.random() * 58;
+        document.getElementById('sync-target-zone').style.left = `${state.crash.zoneStart}%`;
+      } else {
+        // MISSED WINDOW -> Engine destabilizes (brings crash point closer!)
+        sfx.playBlip(190, 0.14, 'sawtooth', 0.18);
+        triggerScreenShake();
+        state.crash.crashPoint = Math.max(state.crash.multiplier + 0.04, state.crash.crashPoint * 0.78);
+        feedback.textContent = 'MISSED SYNC! ENGINE UNSTABLE ⚠️';
+        feedback.className = 'text-coral font-extrabold';
+      }
+    }
+
+    function cashOutCrash() {
+      if (state.crash.status !== 'RUNNING') return;
+      state.crash.status = 'CASHED_OUT';
+      sfx.stopRocketThrust();
+      sfx.playCashout();
+
+      const winMult = state.crash.multiplier;
+      const payout = state.crash.bet * winMult;
+      state.balance += payout;
+      state.streak += 1;
+      state.history.unshift(winMult);
+
+      if (winMult >= 2.0) {
+        progressQuest('q1', 1);
+      }
+      addXP(Math.round(25 * winMult));
+      spawnCrashParticles(35, '#06b6d4');
+      triggerScreenShake();
+
+      // UI Celebration State
+      const multEl = document.getElementById('crash-multiplier');
+      multEl.classList.remove('text-white');
+      multEl.classList.add('text-cyan');
+      document.getElementById('crash-subtext').textContent = `CASHED OUT +◈ ${formatMoney(payout)}!`;
+
+      const pill = document.getElementById('crash-status-pill');
+      pill.innerHTML = `<span class="w-2 h-2 rounded-full bg-cyan"></span><span class="text-cyan">SECURED ${winMult.toFixed(2)}x</span>`;
+
+      showToast(`🚀 CASHED OUT AT ${winMult.toFixed(2)}x (+◈ ${formatMoney(payout)})`, 'cyan');
+      resetCrashButtons();
+      updateHUD();
+    }
+
+    function bustCrash() {
+      state.crash.status = 'CRASHED';
+      sfx.stopRocketThrust();
+      sfx.playCrashExplosion();
+      triggerScreenShake();
+
+      state.streak = 0;
+      state.history.unshift(state.crash.crashPoint);
+      spawnCrashParticles(45, '#f43f5e');
+
+      const multEl = document.getElementById('crash-multiplier');
+      multEl.textContent = `${state.crash.crashPoint.toFixed(2)}x`;
+      multEl.classList.remove('text-white', 'text-cyan');
+      multEl.classList.add('text-coral');
+      document.getElementById('crash-subtext').textContent = 'SIGNAL GLITCHED • BUSTED!';
+
+      const pill = document.getElementById('crash-status-pill');
+      pill.innerHTML = `<span class="w-2 h-2 rounded-full bg-coral"></span><span class="text-coral">CRASHED @ ${state.crash.crashPoint.toFixed(2)}x</span>`;
+
+      resetCrashButtons();
+      updateHUD();
+    }
+
+    function resetCrashButtons() {
+      const mainBtn = document.getElementById('crash-main-btn');
+      mainBtn.className = 'neo-btn glow-lime w-full py-4 px-5 rounded-2xl bg-lime text-void font-extrabold text-lg sm:text-xl tracking-wide uppercase flex flex-col items-center justify-center leading-tight';
+      document.getElementById('crash-btn-title').textContent = '🚀 LAUNCH';
+      document.getElementById('crash-btn-sub').textContent = 'NEXT FLIGHT READY';
+
+      const syncBtn = document.getElementById('sync-boost-btn');
+      syncBtn.disabled = true;
+      syncBtn.classList.remove('glow-violet');
+      document.getElementById('sync-meter-wrapper').classList.add('opacity-35');
+    }
+
+    function spawnCrashParticles(count, color) {
+      const rect = canvas.getBoundingClientRect();
+      const originX = rect.width * 0.72;
+      const originY = rect.height * 0.35;
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 1.5 + Math.random() * 5.5;
+        state.crash.particles.push({
+          x: originX,
+          y: originY,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          life: 1.0,
+          color
+        });
+      }
+    }
+
+    // Main 60FPS Animation Loop for Hyper Crash Canvas & Sync Cursor
+    let lastFrameTime = performance.now();
+    function renderLoop(now) {
+      const dt = Math.min(0.05, (now - lastFrameTime) / 1000);
+      lastFrameTime = now;
+
+      if (state.mode === 'crash') {
+        updateCrashSimulation(now, dt);
+        drawCrashCanvas();
+      }
+      requestAnimationFrame(renderLoop);
+    }
+
+    function updateCrashSimulation(now, dt) {
+      const c = state.crash;
+      if (c.status === 'RUNNING') {
+        const elapsed = (now - c.startTime) / 1000;
+        // Exponential exhilarating curve + earned skill boost
+        const curveMult = Math.pow(Math.E, 0.145 * elapsed);
+        c.multiplier = Math.floor((curveMult + c.bonusMult) * 100) / 100;
+
+        sfx.updateRocketPitch(c.multiplier);
+
+        // Update UI readouts
+        document.getElementById('crash-multiplier').textContent = `${c.multiplier.toFixed(2)}x`;
+        document.getElementById('crash-btn-sub').textContent = `TAKE ◈ ${formatMoney(c.bet * c.multiplier)}`;
+
+        // Oscillate Rhythm Sync Cursor
+        c.syncPos += c.syncDir * (92 * dt);
+        if (c.syncPos >= 97) { c.syncPos = 97; c.syncDir = -1; }
+        if (c.syncPos <= 0) { c.syncPos = 0; c.syncDir = 1; }
+        document.getElementById('sync-cursor').style.left = `${c.syncPos}%`;
+
+        if (c.syncCooldown > 0) {
+          c.syncCooldown = Math.max(0, c.syncCooldown - dt);
+        }
+
+        // Check Auto-Cashout
+        const autoTarget = parseFloat(document.getElementById('auto-cashout-input').value);
+        if (!isNaN(autoTarget) && autoTarget >= 1.1 && c.multiplier >= autoTarget) {
+          cashOutCrash();
+          return;
+        }
+
+        // Check Crash Trigger
+        if (c.multiplier >= c.crashPoint) {
+          bustCrash();
+          return;
+        }
+
+        c.points.push({ t: elapsed, m: c.multiplier });
+        if (c.points.length > 180) c.points.shift();
+      }
+
+      // Update Particles
+      for (let i = c.particles.length - 1; i >= 0; i--) {
+        const p = c.particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.08;
+        p.life -= dt * 1.6;
+        if (p.life <= 0) c.particles.splice(i, 1);
+      }
+    }
+
+    function drawCrashCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+
+      // Subtle Radar Horizon Grid
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+      ctx.lineWidth = 1;
+      for (let gx = 40; gx < w; gx += 48) {
+        ctx.beginPath();
+        ctx.moveTo(gx, 0);
+        ctx.lineTo(gx, h);
+        ctx.stroke();
+      }
+      for (let gy = 30; gy < h; gy += 44) {
+        ctx.beginPath();
+        ctx.moveTo(0, gy);
+        ctx.lineTo(w, gy);
+        ctx.stroke();
+      }
+
+      const c = state.crash;
+      if (c.points.length > 1) {
+        const padLeft = 28;
+        const padBottom = 46;
+        const usableW = w - padLeft * 2;
+        const usableH = h - padBottom - 36;
+
+        const maxM = Math.max(2.2, c.multiplier * 1.15);
+        const startX = padLeft;
+        const startY = h - padBottom;
+
+        // Build smooth quadratic curve coordinates
+        const coords = c.points.map((pt, idx) => {
+          const progress = idx / Math.max(1, c.points.length - 1);
+          const x = startX + progress * (usableW * 0.85);
+          const normY = (pt.m - 1) / (maxM - 1);
+          const y = startY - Math.min(usableH, normY * usableH);
+          return { x, y };
+        });
+
+        // Gradient Underfill
+        const grad = ctx.createLinearGradient(0, 0, 0, h);
+        const lineColor = c.status === 'CRASHED' ? '#f43f5e' : (c.status === 'CASHED_OUT' ? '#06b6d4' : '#a3e635');
+        grad.addColorStop(0, c.status === 'CRASHED' ? 'rgba(244,63,94,0.28)' : 'rgba(163,230,53,0.28)');
+        grad.addColorStop(1, 'rgba(9,9,11,0.0)');
+
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        coords.forEach(p => ctx.lineTo(p.x, p.y));
+        const last = coords[coords.length - 1];
+        ctx.lineTo(last.x, startY);
+        ctx.closePath();
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        // Neon Plasma Line
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        coords.forEach(p => ctx.lineTo(p.x, p.y));
+        ctx.strokeStyle = lineColor;
+        ctx.lineWidth = 4.5;
+        ctx.lineCap = 'round';
+        ctx.shadowColor = lineColor;
+        ctx.shadowBlur = 18;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Glowing Rocket Tip Orb
+        ctx.beginPath();
+        ctx.arc(last.x, last.y, 7, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(last.x, last.y, 13, 0, Math.PI * 2);
+        ctx.strokeStyle = lineColor;
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+      }
+
+      // Draw Burst Particles
+      c.particles.forEach(p => {
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+    }
+
+    /* ==========================================================================
+       5. MODE 2: CYBER MINES (5x5 Risk-Reward Grid)
+       ========================================================================== */
+    function initMinesGridDOM() {
+      const grid = document.getElementById('mines-grid');
+      grid.innerHTML = '';
+      for (let i = 0; i < 25; i++) {
+        const btn = document.createElement('button');
+        btn.id = `mine-cell-${i}`;
+        btn.onclick = () => revealMineTile(i);
+        btn.className = 'mine-tile rounded-xl bg-surface border border-white/10 flex items-center justify-center text-xl sm:text-2xl font-bold shadow-inner';
+        btn.innerHTML = `<span class="w-2 h-2 rounded-full bg-white/10"></span>`;
+        grid.appendChild(btn);
+      }
+    }
+
+    function updateMineCountLabel(val) {
+      state.mines.mineCount = parseInt(val, 10);
+      document.getElementById('mine-count-label').textContent = `${val} ${val == 1 ? 'MINE' : 'MINES'}`;
+      updateMinesMultiplierPreview();
+    }
+
+    function setMineCount(val) {
+      if (state.mines.active) return;
+      sfx.playBlip(540, 0.04);
+      document.getElementById('mine-count-slider').value = val;
+      updateMineCountLabel(val);
+    }
+
+    function calcMinesMultiplier(gemsFound, mineCount) {
+      if (gemsFound === 0) return 1.00;
+      let mult = 0.97; // 3% house edge
+      for (let i = 0; i < gemsFound; i++) {
+        const remainingTiles = 25 - i;
+        const safeTiles = 25 - mineCount - i;
+        mult *= (remainingTiles / safeTiles);
+      }
+      return Math.floor(mult * 100) / 100;
+    }
+
+    function updateMinesMultiplierPreview() {
+      const curr = calcMinesMultiplier(state.mines.gemsFound, state.mines.mineCount);
+      const next = calcMinesMultiplier(state.mines.gemsFound + 1, state.mines.mineCount);
+      state.mines.currentMult = curr;
+      document.getElementById('mines-curr-mult').textContent = `${curr.toFixed(2)}x`;
+      document.getElementById('mines-next-mult').textContent = `${next.toFixed(2)}x`;
+    }
+
+    function handleMinesPrimaryAction() {
+      if (state.mines.active) {
+        cashOutMines();
+      } else {
+        startMinesRound();
+      }
+    }
+
+    function startMinesRound() {
+      const bet = parseFloat(document.getElementById('mines-bet-input').value);
+      if (isNaN(bet) || bet <= 0) {
+        showToast('ENTER A VALID WAGER!', 'coral');
+        return;
+      }
+      if (bet > state.balance) {
+        showToast('NOT ENOUGH CREDITS — HIT +500 RELOAD!', 'coral');
+        return;
+      }
+
+      state.balance -= bet;
+      state.mines.bet = bet;
+      state.mines.active = true;
+      state.mines.gemsFound = 0;
+      state.mines.revealed = Array(25).fill(false);
+
+      // Place mines randomly
+      const board = Array(25).fill('gem');
+      let placed = 0;
+      while (placed < state.mines.mineCount) {
+        const idx = Math.floor(Math.random() * 25);
+        if (board[idx] !== 'mine') {
+          board[idx] = 'mine';
+          placed++;
+        }
+      }
+      state.mines.board = board;
+
+      sfx.playBlip(680, 0.08);
+      addXP(15);
+      updateHUD();
+      updateMinesMultiplierPreview();
+      initMinesGridDOM();
+
+      const btn = document.getElementById('mines-main-btn');
+      btn.className = 'neo-btn glow-lime w-full py-4 px-4 rounded-2xl bg-lime text-void font-extrabold text-base sm:text-lg uppercase tracking-wide flex flex-col items-center justify-center leading-tight mt-1';
+      document.getElementById('mines-btn-title').textContent = '💰 CASH OUT';
+      document.getElementById('mines-btn-sub').textContent = `TAKE ◈ ${formatMoney(bet)}`;
+      document.getElementById('mines-pick-random-btn').disabled = false;
+    }
+
+    function revealMineTile(idx) {
+      if (!state.mines.active || state.mines.revealed[idx]) return;
+      state.mines.revealed[idx] = true;
+      const cell = document.getElementById(`mine-cell-${idx}`);
+
+      if (state.mines.board[idx] === 'mine') {
+        // BOOM! Hit a mine
+        state.mines.active = false;
+        state.streak = 0;
+        sfx.playCrashExplosion();
+        triggerScreenShake();
+
+        // Reveal entire board
+        for (let i = 0; i < 25; i++) {
+          const el = document.getElementById(`mine-cell-${i}`);
+          el.disabled = true;
+          if (state.mines.board[i] === 'mine') {
+            el.className = 'mine-tile rounded-xl bg-coral/25 border-2 border-coral flex items-center justify-center text-xl sm:text-2xl';
+            el.textContent = '💣';
+          } else if (state.mines.revealed[i]) {
+            el.className = 'mine-tile rounded-xl bg-lime/20 border border-lime/50 flex items-center justify-center text-xl sm:text-2xl opacity-75';
+            el.textContent = '💎';
+          }
+        }
+
+        showToast('💥 CYBER MINE DETONATED!', 'coral');
+        resetMinesControls();
+        updateHUD();
+      } else {
+        // SAFE GEM!
+        state.mines.gemsFound += 1;
+        sfx.playSyncHit();
+        progressQuest('q3', 1);
+        addXP(12);
+
+        cell.className = 'mine-tile rounded-xl bg-lime/20 border-2 border-lime shadow-[0_0_15px_rgba(163,230,53,0.3)] flex items-center justify-center text-xl sm:text-2xl scale-105';
+        cell.textContent = '💎';
+
+        updateMinesMultiplierPreview();
+        const payout = state.mines.bet * state.mines.currentMult;
+        document.getElementById('mines-btn-sub').textContent = `TAKE ◈ ${formatMoney(payout)}`;
+
+        // Auto win if all safe tiles cleared
+        if (state.mines.gemsFound >= 25 - state.mines.mineCount) {
+          cashOutMines();
+        }
+      }
+    }
+
+    function pickRandomMineTile() {
+      if (!state.mines.active) return;
+      const hidden = [];
+      for (let i = 0; i < 25; i++) {
+        if (!state.mines.revealed[i]) hidden.push(i);
+      }
+      if (hidden.length > 0) {
+        const pick = hidden[Math.floor(Math.random() * hidden.length)];
+        revealMineTile(pick);
+      }
+    }
+
+    function cashOutMines() {
+      if (!state.mines.active) return;
+      if (state.mines.gemsFound === 0) {
+        showToast('UNCOVER AT LEAST 1 TILE FIRST!', 'cyan');
+        return;
+      }
+
+      state.mines.active = false;
+      const payout = state.mines.bet * state.mines.currentMult;
+      state.balance += payout;
+      state.streak += 1;
+      state.history.unshift(state.mines.currentMult);
+
+      sfx.playCashout();
+      triggerScreenShake();
+      addXP(Math.round(20 * state.mines.currentMult));
+
+      // Reveal remaining bombs dimly
+      for (let i = 0; i < 25; i++) {
+        const el = document.getElementById(`mine-cell-${i}`);
+        el.disabled = true;
+        if (!state.mines.revealed[i] && state.mines.board[i] === 'mine') {
+          el.className = 'mine-tile rounded-xl bg-surface/60 border border-coral/30 flex items-center justify-center text-lg opacity-50';
+          el.textContent = '💣';
+        }
+      }
+
+      showToast(`💎 MINES CASHED OUT: +◈ ${formatMoney(payout)} (${state.mines.currentMult.toFixed(2)}x)`, 'lime');
+      resetMinesControls();
+      updateHUD();
+    }
+
+    function resetMinesControls() {
+      const btn = document.getElementById('mines-main-btn');
+      btn.className = 'neo-btn glow-cyan w-full py-4 px-4 rounded-2xl bg-cyan text-void font-extrabold text-base sm:text-lg uppercase tracking-wide flex flex-col items-center justify-center leading-tight mt-1';
+      document.getElementById('mines-btn-title').textContent = 'START GRID';
+      document.getElementById('mines-btn-sub').textContent = 'FIND DIAMONDS • AVOID BOMBS';
+      document.getElementById('mines-pick-random-btn').disabled = true;
+    }
+
+    /* ==========================================================================
+       6. SIMULATED LIVE SOCIAL FEED & HYPE EMOTE SYSTEM
+       ========================================================================== */
+    const FAKE_PLAYERS = [
+      { handle: '@kai_vibe', badge: 'WHALE', color: 'text-lime' },
+      { handle: '@zara.sol', badge: 'DEGEN', color: 'text-cyan' },
+      { handle: '@nyx_04', badge: 'CYBER LORD', color: 'text-violet' },
+      { handle: '@leo.gg', badge: 'ROOKIE', color: 'text-amber-300' },
+      { handle: '@mira_x', badge: 'DEGEN', color: 'text-pink-400' },
+      { handle: '@vex.eth', badge: 'WHALE', color: 'text-lime' }
+    ];
+
+    function pushSocialFeedItem(customItem = null) {
+      const feed = document.getElementById('social-feed');
+      const user = customItem?.user || FAKE_PLAYERS[Math.floor(Math.random() * FAKE_PLAYERS.length)];
+      const isWin = customItem ? customItem.isWin : Math.random() > 0.34;
+      const mult = customItem?.mult || (isWin ? (1.35 + Math.random() * 9.5).toFixed(2) : (1.01 + Math.random() * 0.8).toFixed(2));
+      const amt = customItem?.amt || Math.floor(25 + Math.random() * 450);
+
+      const item = document.createElement('div');
+      item.className = 'p-2.5 rounded-2xl bg-void/85 border border-white/10 flex items-center justify-between gap-2 text-xs transition-all';
+      item.innerHTML = `
+        <div class="flex flex-col min-w-0">
+          <div class="flex items-center gap-1.5">
+            <span class="font-bold truncate ${user.color}">${user.handle}</span>
+            <span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-surface text-zinc-400">${user.badge}</span>
+          </div>
+          <span class="text-[11px] font-mono text-zinc-400 mt-0.5">
+            ${isWin ? `Cashed out <strong class="text-white">${mult}x</strong>` : `Busted at <span class="text-coral">${mult}x</span> 💀`}
+          </span>
+        </div>
+        <div class="font-mono font-extrabold text-xs shrink-0 ${isWin ? 'text-lime' : 'text-coral'}">
+          ${isWin ? `+◈${Math.round(amt * mult)}` : `-◈${amt}`}
+        </div>
+      `;
+
+      feed.prepend(item);
+      while (feed.children.length > 18) {
+        feed.removeChild(feed.lastChild);
+      }
+    }
+
+    function sendHypeEmote(emoji) {
+      sfx.playBlip(760, 0.05, 'sine', 0.1);
+      const stage = document.getElementById('emote-stage');
+      const el = document.createElement('div');
+      el.className = 'floating-emote fixed text-3xl sm:text-4xl select-none';
+      const randX = 15 + Math.random() * 70;
+      const randY = 55 + Math.random() * 25;
+      el.style.left = `${randX}vw`;
+      el.style.top = `${randY}vh`;
+      el.textContent = emoji;
+      stage.appendChild(el);
+      setTimeout(() => el.remove(), 1150);
+    }
+
+    // Keyboard shortcut: Spacebar triggers Sync Boost while flying, or Launch when idle
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' && document.activeElement.tagName !== 'INPUT') {
+        e.preventDefault();
+        if (state.mode === 'crash') {
+          if (state.crash.status === 'RUNNING') {
+            triggerSyncBoost();
+          } else {
+            launchCrashRound();
+          }
+        }
+      }
+    });
+
+    /* ==========================================================================
+       7. INITIALIZATION ON WINDOW LOAD
+       ========================================================================== */
+    window.onload = function () {
+      resizeCrashCanvas();
+      initMinesGridDOM();
+      updateMinesMultiplierPreview();
+      updateHUD();
+
+      // Seed initial social lobby feed
+      for (let i = 0; i < 6; i++) {
+        pushSocialFeedItem();
+      }
+
+      // Periodic live lobby simulation
+      setInterval(() => {
+        pushSocialFeedItem();
+        const online = 410 + Math.floor(Math.random() * 45);
+        document.getElementById('online-count').textContent = `${online} ONLINE`;
+      }, 3400);
+
+      requestAnimationFrame(renderLoop);
+    };
+  </script>
+</body>
+</html>
